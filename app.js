@@ -182,22 +182,72 @@ async function updateProgress(step, title, description, progress) {
     await sleep(500);
 }
 
-// Convert Video to Audio (Simplified - just prepare video for upload)
+// Convert Video to Audio (Extract & Compress to MP3)
 async function convertVideoToAudio() {
-    // Gemini API now supports video directly, so we'll just prepare the video blob
-    // This avoids MediaRecorder/AudioContext issues with file:// protocol
-    return new Promise((resolve) => {
-        // Simply store the video file as-is
-        state.audioBlob = state.currentVideo;
-        resolve();
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!state.currentVideo) {
+                reject(new Error("No video selected"));
+                return;
+            }
+
+            // 1. Read video file as ArrayBuffer
+            const arrayBuffer = await state.currentVideo.arrayBuffer();
+
+            // 2. Decode audio data
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            // 3. Encode to MP3 using lamejs
+            // We use 32kbps mono for speech - extremely efficient and clear enough for AI
+            const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 32); // Mono, SampleRate, 32kbps
+            const samples = audioBuffer.getChannelData(0); // Get first channel
+
+            // Convert Float32Array to Int16Array (required by lamejs)
+            const sampleBlockSize = 1152; // multiple of 576
+            const mp3Data = [];
+            const int16Samples = new Int16Array(samples.length);
+
+            for (let i = 0; i < samples.length; i++) {
+                // Determine the sample value (clamp to -1 to 1)
+                let s = Math.max(-1, Math.min(1, samples[i]));
+                // Convert to 16-bit integer (scale by 32767)
+                int16Samples[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+
+            let remaining = int16Samples.length;
+            for (let i = 0; i < int16Samples.length; i += sampleBlockSize) {
+                const sampleChunk = int16Samples.subarray(i, i + sampleBlockSize);
+                const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
+                if (mp3buf.length > 0) {
+                    mp3Data.push(mp3buf);
+                }
+            }
+
+            const mp3buf = mp3Encoder.flush();
+            if (mp3buf.length > 0) {
+                mp3Data.push(mp3buf);
+            }
+
+            // 4. Create MP3 Blob
+            const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+            state.audioBlob = blob;
+
+            console.log(`Compressed: ${state.currentVideo.size} bytes -> ${blob.size} bytes`);
+            resolve();
+
+        } catch (error) {
+            console.error("Audio conversion failed:", error);
+            reject(new Error("Failed to process video audio. The file might be corrupted or format unsupported."));
+        }
     });
 }
 
 // Analyze with Gemini (via Server Proxy)
 async function analyzeWithGemini() {
     try {
-        // Convert video to base64
-        const videoBase64 = await blobToBase64(state.currentVideo);
+        // Convert COMPRESSED AUDIO to base64
+        const videoBase64 = await blobToBase64(state.audioBlob);
 
         // Call our server endpoint instead of Gemini directly
         const response = await fetch('/api/analyze', {
@@ -206,8 +256,8 @@ async function analyzeWithGemini() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                videoData: videoBase64.split(',')[1], // Remove data:video/... prefix
-                mimeType: state.currentVideo.type || 'video/mp4'
+                videoData: videoBase64.split(',')[1], // Remove data:audio/... prefix
+                mimeType: 'audio/mp3'
             })
         });
 

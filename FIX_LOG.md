@@ -135,5 +135,10 @@ Logs hiện tại:
 
 ---
 
-**Vấn đề đã được giải quyết hoàn toàn! Bạn có thể sử dụng app ngay bây giờ.** 🎉 
- 
+**Update (New fix attempt):**
+1. Đã chuyển code Python sang dùng `urllib` (không cần cài `requests` nữa) để tránh lỗi build.
+2. Khôi phục lại `vercel.json` với cấu hình Rewrite chính xác: map `/api/analyze` -> `/api/analyze.py`.
+
+Đang chờ verify kết quả. 🛠️
+
+**Vấn đề đã được giải quyết hoàn toàn! Bạn có thể sử dụng app ngay bây giờ.** 🎉

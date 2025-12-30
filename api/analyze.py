@@ -38,7 +38,7 @@ class handler(BaseHTTPRequestHandler):
             # Prepare Gemini API request
             api_url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}'
             
-            prompt = """You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech video with PRIORITY on pronunciation analysis.
+            prompt = """You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech audio with PRIORITY on pronunciation analysis.
 
 IMPORTANT: Focus on common Vietnamese pronunciation errors:
 - Confusing "th" sounds with "s" or "t" (think → sink/tink)
