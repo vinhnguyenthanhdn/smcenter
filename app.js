@@ -56,7 +56,12 @@ function setupEventListeners() {
     elements.dropzone.addEventListener('drop', handleDrop);
 
     // Fix: Click anywhere on dropzone triggers input
-    elements.dropzone.addEventListener('click', () => elements.videoInput.click());
+    elements.dropzone.addEventListener('click', (e) => {
+        // Only trigger if click wasn't on the label (which triggers natively)
+        if (!e.target.closest('label')) {
+            elements.videoInput.click();
+        }
+    });
 
     // Analyze Button
     elements.analyzeBtn.addEventListener('click', startAnalysis);
