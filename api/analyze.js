@@ -18,7 +18,7 @@ export default async function handler(request, response) {
     // Check if API Key is configured
     if (!process.env.GEMINI_API_KEY) {
         console.error("Missing GEMINI_API_KEY");
-        return response.status(500).json({ error: "Server API Key not configured inside Vercel" });
+        return response.status(500).json({ error: "Server API Key not configured" });
     }
 
     if (request.method !== 'POST') {
@@ -34,6 +34,7 @@ export default async function handler(request, response) {
 
         // Initialize Gemini API
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        // Use gemini-1.5-flash as it is multimodal
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech audio with PRIORITY on pronunciation analysis.
@@ -86,16 +87,19 @@ Analyze these aspects IN THIS ORDER:
             }
         ];
 
+        console.log("Sending request to Gemini...");
+
         const result = await model.generateContent({
             contents: [{ role: "user", parts }],
             generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: 2048,
-                responseMimeType: "application/json"
+                maxOutputTokens: 2048
+                // REMOVED: responseMimeType: "application/json" to fix 400 bad request
             }
         });
 
         const output = result.response.text();
+        console.log("Gemini response length:", output.length);
 
         // Parse JSON safely
         let analysisResult;
@@ -118,9 +122,11 @@ Analyze these aspects IN THIS ORDER:
 
     } catch (error) {
         console.error("Gemini API Error:", error);
+        // Return detailed error to help debugging
         return response.status(500).json({
             error: "AI Analysis Failed",
-            details: error.message
+            message: error.message,
+            details: error.toString()
         });
     }
 }
