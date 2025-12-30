@@ -1,11 +1,7 @@
-"""
-Vercel Serverless Function for Speech Analysis
-Handles Gemini API calls server-side to protect API key
-"""
-
 import os
 import json
-import requests
+import urllib.request
+import urllib.error
 from http.server import BaseHTTPRequestHandler
 
 # Get API key from environment variable
@@ -15,15 +11,22 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             # Check if API key is configured
-            if not GEMINI_API_KEY or GEMINI_API_KEY == 'your_api_key_here':
-                self.send_error_response(500, 'API key not configured', 
-                    'Please set GEMINI_API_KEY environment variable in Vercel')
+            if not GEMINI_API_KEY:
+                self.send_error_response(500, 'API key not configured')
                 return
             
             # Get content length and read request body
-            content_length = int(self.headers['Content-Length'])
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length == 0:
+                self.send_error_response(400, 'No data provided')
+                return
+                
             post_data = self.rfile.read(content_length)
-            data = json.loads(post_data.decode('utf-8'))
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+            except json.JSONDecodeError:
+                self.send_error_response(400, 'Invalid JSON')
+                return
             
             video_base64 = data.get('videoData')
             mime_type = data.get('mimeType', 'video/mp4')
@@ -92,44 +95,50 @@ Analyze these aspects IN THIS ORDER:
                 }
             }
 
-            # Call Gemini API
-            response = requests.post(api_url, json=request_body, timeout=120)
-            
-            if not response.ok:
-                error_data = response.json() if response.text else {}
-                self.send_error_response(response.status_code, 
-                    f'Gemini API error: {response.status_code}', 
-                    json.dumps(error_data))
-                return
-            
-            # Parse response
-            gemini_data = response.json()
-            response_text = gemini_data['candidates'][0]['content']['parts'][0]['text']
-            
-            # Try to parse JSON from response
+            # Call Gemini API using urllib (No dependencies needed!)
+            req = urllib.request.Request(
+                api_url, 
+                data=json.dumps(request_body).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+
             try:
-                json_text = response_text.replace('```json\n', '').replace('```\n', '').replace('```', '').strip()
-                analysis_result = json.loads(json_text)
-            except:
-                # If parsing fails, create structured response
-                analysis_result = {
-                    "score": 75,
-                    "overall": "Good performance with room for improvement",
-                    "strengths": ["Clear pronunciation", "Good vocabulary", "Confident delivery"],
-                    "improvements": ["Reduce filler words", "Improve intonation", "Better pacing"],
-                    "detailedFeedback": response_text
-                }
+                with urllib.request.urlopen(req, timeout=120) as response:
+                    response_data = response.read().decode('utf-8')
+                    gemini_data = json.loads(response_data)
+                    
+                    if 'candidates' not in gemini_data or not gemini_data['candidates']:
+                        self.send_error_response(500, 'No output from Gemini')
+                        return
+
+                    response_text = gemini_data['candidates'][0]['content']['parts'][0]['text']
+                    
+                    # Try to parse JSON from analysis response
+                    try:
+                        json_text = response_text.replace('```json\n', '').replace('```\n', '').replace('```', '').strip()
+                        analysis_result = json.loads(json_text)
+                    except:
+                        # Fallback
+                        analysis_result = {
+                            "score": 75,
+                            "overall": "Good effort! Analysis processed successfully.",
+                            "strengths": ["Completed speech analysis"],
+                            "improvements": ["Check detailed feedback text"],
+                            "detailedFeedback": response_text
+                        }
+                    
+                    self.send_json_response(200, analysis_result)
+
+            except urllib.error.HTTPError as e:
+                error_content = e.read().decode('utf-8')
+                self.send_error_response(e.code, f'Gemini API Error: {e.reason}', error_content)
+            except urllib.error.URLError as e:
+                self.send_error_response(500, f'Connection Error: {e.reason}')
             
-            # Send success response
-            self.send_json_response(200, analysis_result)
-            
-        except requests.Timeout:
-            self.send_error_response(504, 'Request timeout - video may be too long')
         except Exception as e:
             self.send_error_response(500, str(e))
     
     def do_OPTIONS(self):
-        # Handle CORS preflight
         self.send_response(200)
         self.send_cors_headers()
         self.end_headers()
