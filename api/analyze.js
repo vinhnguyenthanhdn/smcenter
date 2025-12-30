@@ -37,8 +37,8 @@ export default async function handler(request, response) {
         // Initialize Gemini API
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-        // Switch to gemini-1.5-pro (more widely available/stable than flash sometimes)
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        // Switch to gemini-1.5-flash-latest (more widely available/stable than flash sometimes)
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
         const prompt = `You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech audio with PRIORITY on pronunciation analysis.
 
