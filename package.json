@@ -1,7 +1,8 @@
 {
     "name": "smcenter-api",
     "version": "1.0.0",
+    "type": "module",
     "dependencies": {
-        "@google/generative-ai": "^0.1.3"
+        "@google/generative-ai": "^0.2.0"
     }
 }

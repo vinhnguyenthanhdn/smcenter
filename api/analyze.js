@@ -1,6 +1,6 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-module.exports = async (request, response) => {
+export default async function handler(request, response) {
     // Handle CORS
     response.setHeader('Access-Control-Allow-Credentials', true);
     response.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,7 +18,7 @@ module.exports = async (request, response) => {
     // Check if API Key is configured
     if (!process.env.GEMINI_API_KEY) {
         console.error("Missing GEMINI_API_KEY");
-        return response.status(500).json({ error: "Server API Key not configured" });
+        return response.status(500).json({ error: "Server API Key not configured inside Vercel" });
     }
 
     if (request.method !== 'POST') {
@@ -32,7 +32,7 @@ module.exports = async (request, response) => {
             return response.status(400).json({ error: "No audio data provided" });
         }
 
-        // Initialize Gemini API inside handler
+        // Initialize Gemini API
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -107,9 +107,9 @@ Analyze these aspects IN THIS ORDER:
             // Fallback
             analysisResult = {
                 score: 75,
-                overall: "Formatted analysis unavailable, see details.",
+                overall: "Formatted analysis unavailable.",
                 strengths: ["Audio processed"],
-                improvements: ["Check details"],
+                improvements: ["See detailed feedback"],
                 detailedFeedback: output
             };
         }
@@ -123,4 +123,4 @@ Analyze these aspects IN THIS ORDER:
             details: error.message
         });
     }
-};
+}
