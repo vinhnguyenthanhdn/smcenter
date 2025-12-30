@@ -232,13 +232,26 @@ async function convertVideoToAudio() {
             // 4. Create MP3 Blob
             const blob = new Blob(mp3Data, { type: 'audio/mp3' });
             state.audioBlob = blob;
+            // Mark as valid MP3
+            state.mimeType = 'audio/mp3';
 
             console.log(`Compressed: ${state.currentVideo.size} bytes -> ${blob.size} bytes`);
             resolve();
 
         } catch (error) {
             console.error("Audio conversion failed:", error);
-            reject(new Error("Failed to process video audio. The file might be corrupted or format unsupported."));
+
+            // Fallback: If conversion fails but video is small (< 4.5MB), use original
+            // Note: 4.5MB limit to be safe with Vercel Serverless Payload limit
+            if (state.currentVideo.size < 4.5 * 1024 * 1024) {
+                console.log("Fallback: Using original file (size within limits)");
+                state.audioBlob = state.currentVideo;
+                state.mimeType = state.currentVideo.type || 'video/mp4';
+                resolve();
+                return;
+            }
+
+            reject(new Error("Lỗi xử lý file trên thiết bị này. Vui lòng:\n1. Dùng máy tính (PC) để upload\n2. Hoặc quay video ngắn hơn (< 4.5MB).\n(Lỗi kỹ thuật: Browser không hỗ trợ decode audio format này)"));
         }
     });
 }
@@ -257,7 +270,7 @@ async function analyzeWithGemini() {
             },
             body: JSON.stringify({
                 videoData: videoBase64.split(',')[1], // Remove data:audio/... prefix
-                mimeType: 'audio/mp3'
+                mimeType: state.mimeType || 'audio/mp3'
             })
         });
 
