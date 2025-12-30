@@ -598,6 +598,47 @@ body {
     color: var(--text-secondary);
 }
 
+/* Pronunciation Errors */
+.pronunciation-errors {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.pronunciation-error-item {
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #ef4444;
+    transition: all var(--transition-normal);
+}
+
+.pronunciation-error-item:hover {
+    background: var(--surface);
+    transform: translateX(4px);
+}
+
+.error-word {
+    font-size: 1.1rem;
+    color: #ef4444;
+    margin-bottom: var(--spacing-xs);
+}
+
+.error-description {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+}
+
+.error-correction {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+.error-label,
+.correction-label {
+    font-weight: 600;
+    margin-right: var(--spacing-xs);
+}
+
 /* Modal */
 .modal {
     display: none;

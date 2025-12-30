@@ -118,13 +118,6 @@ function validateAndLoadVideo(file) {
         const minutes = Math.floor(duration / 60);
         const seconds = Math.floor(duration % 60);
 
-        // Check duration (1-10 minutes)
-        if (duration < 60 || duration > 600) {
-            alert('Video duration must be between 1 and 10 minutes');
-            resetApp();
-            return;
-        }
-
         elements.videoDuration.textContent = `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
         elements.videoPreview.classList.remove('hidden');
     });
@@ -295,6 +288,32 @@ function displayResults() {
 
     elements.scoreTitle.textContent = scoreCategory;
     elements.scoreDescription.textContent = scoreDesc;
+
+    // Display pronunciation errors (if available)
+    const pronunciationSection = document.getElementById('pronunciationSection');
+    const pronunciationErrorsList = document.getElementById('pronunciationErrorsList');
+
+    if (result.pronunciationErrors && result.pronunciationErrors.length > 0) {
+        pronunciationSection.style.display = 'block';
+        pronunciationErrorsList.innerHTML = '';
+
+        result.pronunciationErrors.forEach(error => {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'pronunciation-error-item';
+            errorDiv.innerHTML = `
+                <div class="error-word"><strong>❌ "${error.word}"</strong></div>
+                <div class="error-description">
+                    <span class="error-label">Lỗi:</span> ${error.error}
+                </div>
+                <div class="error-correction">
+                    <span class="correction-label">✅ Đúng:</span> ${error.correction}
+                </div>
+            `;
+            pronunciationErrorsList.appendChild(errorDiv);
+        });
+    } else {
+        pronunciationSection.style.display = 'none';
+    }
 
     // Display strengths
     elements.strengthsList.innerHTML = '';

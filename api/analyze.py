@@ -35,32 +35,44 @@ class handler(BaseHTTPRequestHandler):
             # Prepare Gemini API request
             api_url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}'
             
-            prompt = """You are an expert English speech coach. Analyze this English speech video and provide detailed feedback.
+            prompt = """You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech video with PRIORITY on pronunciation analysis.
+
+IMPORTANT: Focus on common Vietnamese pronunciation errors:
+- Confusing "th" sounds with "s" or "t" (think → sink/tink)
+- Confusing "v" with "w" or "f" (very → wery)
+- Missing final consonants (stop → sto, want → wan)
+- Confusing short/long vowels (hit vs heat, full vs fool)
+- Word stress patterns
+- Sentence intonation
 
 Please provide your analysis in the following JSON format:
 {
   "score": [number from 0-100],
   "overall": "[brief overall assessment]",
+  "pronunciationErrors": [
+    {"word": "[mispronounced word]", "error": "[what's wrong]", "correction": "[how to say it correctly]"},
+    {"word": "[word 2]", "error": "[error type]", "correction": "[correct pronunciation]"}
+  ],
   "strengths": [
     "[strength 1]",
     "[strength 2]",
     "[strength 3]"
   ],
   "improvements": [
-    "[area 1 to improve]",
+    "[area 1 to improve - PRIORITIZE pronunciation issues]",
     "[area 2 to improve]",
     "[area 3 to improve]"
   ],
-  "detailedFeedback": "[detailed paragraph about pronunciation, fluency, grammar, vocabulary, content organization, and delivery]"
+  "detailedFeedback": "[detailed paragraph focusing on: 1) Specific pronunciation mistakes (list words), 2) Vietnamese accent features to improve, 3) Grammar and vocabulary, 4) Fluency and delivery]"
 }
 
-Consider these aspects:
-1. Pronunciation and clarity
-2. Fluency and pace
-3. Grammar and vocabulary
-4. Content organization
-5. Confidence and delivery
-6. Use of transitions and connectors"""
+Analyze these aspects IN THIS ORDER:
+1. **PRONUNCIATION** (most important) - List specific mispronounced words
+2. Common Vietnamese English errors  
+3. Fluency and pace
+4. Grammar and vocabulary
+5. Content organization
+6. Confidence and delivery"""
 
             request_body = {
                 "contents": [{
