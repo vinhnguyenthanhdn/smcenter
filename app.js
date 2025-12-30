@@ -55,6 +55,9 @@ function setupEventListeners() {
     elements.dropzone.addEventListener('dragleave', handleDragLeave);
     elements.dropzone.addEventListener('drop', handleDrop);
 
+    // Fix: Click anywhere on dropzone triggers input
+    elements.dropzone.addEventListener('click', () => elements.videoInput.click());
+
     // Analyze Button
     elements.analyzeBtn.addEventListener('click', startAnalysis);
 
@@ -94,14 +97,14 @@ function handleDrop(e) {
 function validateAndLoadVideo(file) {
     // Check if it's a video file
     if (!file.type.startsWith('video/')) {
-        alert('Please upload a video file');
+        alert('Vui lòng chọn file Video');
         return;
     }
 
     // Check file size (max 500MB)
     const maxSize = 500 * 1024 * 1024; // 500MB
     if (file.size > maxSize) {
-        alert('File size must be less than 500MB');
+        alert('File quá lớn. Vui lòng chọn file dưới 500MB');
         return;
     }
 
@@ -118,7 +121,7 @@ function validateAndLoadVideo(file) {
         const minutes = Math.floor(duration / 60);
         const seconds = Math.floor(duration % 60);
 
-        elements.videoDuration.textContent = `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        elements.videoDuration.textContent = `Thời lượng: ${minutes}:${seconds.toString().padStart(2, '0')}`;
         elements.videoPreview.classList.remove('hidden');
     });
 }
@@ -126,7 +129,7 @@ function validateAndLoadVideo(file) {
 // Start Analysis
 async function startAnalysis() {
     if (!state.currentVideo) {
-        alert('Please upload a video first');
+        alert('Vui lòng chọn video trước');
         return;
     }
 
@@ -135,19 +138,19 @@ async function startAnalysis() {
 
     try {
         // Step 1: Upload (simulate)
-        await updateProgress(1, 'Uploading', 'Preparing your video...', 25);
+        await updateProgress(1, 'Đang tải lên', 'Đang chuẩn bị video...', 25);
         await sleep(1000);
 
         // Step 2: Convert to audio
-        await updateProgress(2, 'Converting', 'Extracting audio from video...', 50);
+        await updateProgress(2, 'Đang chuyển đổi', 'Đang tách âm thanh từ video...', 50);
         await convertVideoToAudio();
 
         // Step 3: Analyze with Gemini
-        await updateProgress(3, 'Analyzing', 'AI is analyzing your speech...', 75);
+        await updateProgress(3, 'Đang phân tích', 'AI đang chấm điểm phát âm...', 75);
         await analyzeWithGemini();
 
         // Step 4: Finalize
-        await updateProgress(4, 'Finalizing', 'Preparing your results...', 100);
+        await updateProgress(4, 'Hoàn tất', 'Đang tổng hợp kết quả...', 100);
         await sleep(1000);
 
         // Show results
@@ -156,7 +159,7 @@ async function startAnalysis() {
 
     } catch (error) {
         console.error('Analysis error:', error);
-        alert('An error occurred during analysis. Please try again.');
+        alert('Có lỗi xảy ra trong quá trình phân tích. Vui lòng thử lại.');
         resetApp();
     }
 }
@@ -284,7 +287,7 @@ async function analyzeWithGemini() {
 
     } catch (error) {
         console.error('Analysis error:', error);
-        alert(`Analysis failed: ${error.message}\n\nPlease ensure the server has valid API key in .env file.`);
+        alert(`Lỗi phân tích: ${error.message}\n\nVui lòng kiểm tra lại kết nối hoặc file video.`);
         throw error;
     }
 }
@@ -331,17 +334,17 @@ function displayResults() {
     // Set score info
     let scoreCategory, scoreDesc;
     if (result.score >= 85) {
-        scoreCategory = "Excellent Performance!";
-        scoreDesc = "Your speech demonstrates excellent quality across all dimensions.";
+        scoreCategory = "Xuất sắc!";
+        scoreDesc = "Bạn nói tiếng Anh rất tốt, hãy cố gắng phát huy!";
     } else if (result.score >= 70) {
-        scoreCategory = "Good Performance!";
-        scoreDesc = result.overall || "Your speech shows good overall quality with some areas for improvement.";
+        scoreCategory = "Làm tốt lắm!";
+        scoreDesc = result.overall || "Bạn nói khá tốt, nhưng cần cải thiện một số lỗi nhỏ.";
     } else if (result.score >= 50) {
-        scoreCategory = "Fair Performance";
-        scoreDesc = result.overall || "Your speech is understandable but needs significant improvement.";
+        scoreCategory = "Tạm ổn";
+        scoreDesc = result.overall || "Bạn cần luyện tập phát âm nhiều hơn để cải thiện độ trôi chảy.";
     } else {
-        scoreCategory = "Needs Improvement";
-        scoreDesc = result.overall || "Your speech requires substantial work in multiple areas.";
+        scoreCategory = "Cần cố gắng nhiều";
+        scoreDesc = result.overall || "Hãy tập trung sửa các lỗi phát âm cơ bản trước nhé.";
     }
 
     elements.scoreTitle.textContent = scoreCategory;
@@ -364,7 +367,7 @@ function displayResults() {
                     <span class="error-label">Lỗi:</span> ${error.error}
                 </div>
                 <div class="error-correction">
-                    <span class="correction-label">✅ Đúng:</span> ${error.correction}
+                    <span class="correction-label">✅ Sửa:</span> ${error.correction}
                 </div>
             `;
             pronunciationErrorsList.appendChild(errorDiv);
