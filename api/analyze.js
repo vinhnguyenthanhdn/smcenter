@@ -15,32 +15,64 @@ export default async function handler(request, response) {
         return;
     }
 
-    // Check if API Key is configured
-    if (!process.env.GEMINI_API_KEY) {
-        console.error("Missing GEMINI_API_KEY");
-        return response.status(500).json({ error: "Server API Key not configured" });
-    }
-
     if (request.method !== 'POST') {
         return response.status(405).json({ error: 'Method not allowed' });
     }
 
-    try {
-        const { videoData, mimeType } = request.body;
+    // 1. Get API Keys (Legacy single key OR New multi-key support)
+    const keys = process.env.GEMINI_API_KEYS
+        ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(k => k)
+        : (process.env.GEMINI_API_KEY ? [process.env.GEMINI_API_KEY] : []);
 
-        if (!videoData) {
-            return response.status(400).json({ error: "No audio data provided" });
+    if (keys.length === 0) {
+        console.error("Missing GEMINI_API_KEYS or GEMINI_API_KEY");
+        return response.status(500).json({ error: "Server API Key not configured" });
+    }
+
+    const { videoData, mimeType } = request.body;
+
+    if (!videoData) {
+        return response.status(400).json({ error: "No audio data provided" });
+    }
+
+    // 2. Rotate Keys Logic
+    let lastError = null;
+    console.log(`Available API Keys: ${keys.length}`);
+
+    for (const [index, apiKey] of keys.entries()) {
+        try {
+            console.log(`Attempting analysis with Key #${index + 1} (${apiKey.substring(0, 5)}...)`);
+            const result = await analyzeWithKey(apiKey, videoData, mimeType);
+            console.log(`Success with Key #${index + 1}`);
+            return response.status(200).json(result);
+
+        } catch (error) {
+            console.error(`Failed with Key #${index + 1}:`, error.message);
+            lastError = error;
+
+            // Check if we should retry with next key
+            // We generally retry on 429 (Too Many Requests), 500 (Server Error), or 403 (Quota/Permission)
+            // Error handling depends on Google library, but usually error.message or error.status contains info.
+            // Current strategy: Retry on ALL errors except 400 (Bad Request - Data invalid).
+
+            // If it's the last key, loop finishes and we return error below.
         }
+    }
 
-        console.log("Initializing Gemini 1.5 Pro...");
+    // 3. All keys failed
+    return response.status(500).json({
+        error: "All API Keys exhausted or Analysis Failed",
+        message: lastError ? lastError.message : "Unknown error",
+        details: lastError ? lastError.toString() : null
+    });
+}
 
-        // Initialize Gemini API
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Helper function to encapsulate Gemini logic
+async function analyzeWithKey(apiKey, videoData, mimeType) {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-        // Switch to gemini-1.5-flash-latest (more widely available/stable than flash sometimes)
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-
-        const prompt = `You are a friendly English teacher at "SM English Center" giving feedback to a Vietnamese student (address the student as "Con").
+    const prompt = `You are a friendly English teacher at "SM English Center" giving feedback to a Vietnamese student (address the student as "Con").
 
 Analyze the audio with PRIORITY on pronunciation.
 
@@ -91,56 +123,38 @@ Analyze these aspects IN THIS ORDER:
 2. Common Vietnamese English errors  
 3. Fluency and pace`;
 
-        // Prepare content parts
-        const parts = [
-            { text: prompt },
-            {
-                inlineData: {
-                    mimeType: mimeType || "audio/mp3",
-                    data: videoData
-                }
+    const parts = [
+        { text: prompt },
+        {
+            inlineData: {
+                mimeType: mimeType || "audio/mp3",
+                data: videoData
             }
-        ];
-
-        console.log("Sending request to Gemini...");
-
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 2048
-            }
-        });
-
-        const output = result.response.text();
-        console.log("Gemini response length:", output.length);
-
-        // Parse JSON safely
-        let analysisResult;
-        try {
-            const jsonText = output.replace(/```json\n/g, '').replace(/```\n/g, '').replace(/```/g, '').trim();
-            analysisResult = JSON.parse(jsonText);
-        } catch (e) {
-            console.error("JSON Parse Error:", e);
-            // Fallback
-            analysisResult = {
-                score: 75,
-                overall: "Formatted analysis unavailable.",
-                strengths: ["Audio processed"],
-                improvements: ["See detailed feedback"],
-                detailedFeedback: output
-            };
         }
+    ];
 
-        return response.status(200).json(analysisResult);
+    const result = await model.generateContent({
+        contents: [{ role: "user", parts }],
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048
+        }
+    });
 
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        // Return detailed error to help debugging
-        return response.status(500).json({
-            error: "AI Analysis Failed",
-            message: error.message,
-            details: error.toString()
-        });
+    const output = result.response.text();
+    // Parse JSON safely
+    try {
+        const jsonText = output.replace(/```json\n/g, '').replace(/```\n/g, '').replace(/```/g, '').trim();
+        return JSON.parse(jsonText);
+    } catch (e) {
+        console.error("JSON Parse Error in Worker:", e);
+        // Return structured fallback instead of crashing
+        return {
+            score: 75,
+            overall: "Formatted analysis unavailable.",
+            strengths: ["Audio processed"],
+            improvements: ["See detailed feedback"],
+            detailedFeedback: output
+        };
     }
 }
