@@ -45,10 +45,10 @@ export default async function handler(request, response) {
 Analyze the audio with PRIORITY on pronunciation.
 
 Generate "detailedFeedback" strictly in this Vietnamese format:
-"[Câu khen ngợi đa dạng và tự nhiên]. Tuy nhiên, con chú ý chỉnh lại một vài từ sau để phát âm chuẩn hơn:
+"[Câu khen ngợi đa dạng và tự nhiên]. Tuy nhiên, con chú ý luyện tập thêm các từ sau đây:
 - [word]: https://dictionary.cambridge.org/dictionary/english/[word]
 - [word]: https://dictionary.cambridge.org/dictionary/english/[word]
-Con hãy nghe link từ điển và luyện tập lại nha."
+Con hãy nghe kỹ link từ điển và sửa lại cho đúng nhé."
 
 INSTRUCTIONS FOR PRAISE (Important):
 - Be creative and generous with praise but keep it realistic.
@@ -56,9 +56,10 @@ INSTRUCTIONS FOR PRAISE (Important):
 - Examples: "Cô rất ấn tượng với ngữ điệu tự tin của con hôm nay!", "Hoan hô con, bài tập về nhà con làm rất đầy đủ và chỉn chu.", "Giọng con hôm nay rất khỏe và rõ ràng, cô khen nhé!", "Con đã tiến bộ nhiều về âm đuôi (ending sounds), rất tốt!"...
 - Adapt the praise to the specific strengths of the speech (fluency, energy, precision, effort).
 
-INSTRUCTIONS FOR TONE:
-- Avoid overusing the word "nhé" at the end of every sentence.
-- Use variety: "nha", "đi nào", "cố gắng lên", or simple gentle statements.
+INSTRUCTIONS FOR TONE (CRITICAL):
+- DO NOT REPEAT sentence ending particles (like "nhé", "nha", "ạ") more than ONCE.
+- Use a mix of statement sentences and gentle commands.
+- Example of variety: "Con cần sửa từ này." (Statement) -> "Hãy cố gắng hơn!" (Exclamation) -> "Con làm tốt lắm." (Statement).
 
 IMPORTANT:
 - Always include valid Cambridge Dictionary links for mispronounced words.
