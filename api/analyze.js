@@ -40,44 +40,46 @@ export default async function handler(request, response) {
         // Switch to gemini-1.5-flash-latest (more widely available/stable than flash sometimes)
         const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-        const prompt = `You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech audio with PRIORITY on pronunciation analysis.
+        const prompt = `You are a friendly English teacher at "SM English Center" giving feedback to a Vietnamese student (address the student as "Con").
 
-IMPORTANT: Focus on common Vietnamese pronunciation errors:
-- Confusing "th" sounds with "s" or "t" (think → sink/tink)
-- Confusing "v" with "w" or "f" (very → wery)
-- Missing final consonants (stop → sto, want → wan)
-- Confusing short/long vowels (hit vs heat, full vs fool)
-- Word stress patterns
-- Sentence intonation
+Analyze the audio with PRIORITY on pronunciation.
+
+Generate "detailedFeedback" strictly in this Vietnamese format:
+"Good job Con! [Khen ngợi 1-2 câu về sự tiến bộ, hoàn thành bài tập, hoặc âm cuối rõ ràng].
+Tuy nhiên, con sửa lại phát âm các từ sau để bài nói được hoàn thiện hơn nhé:
+- [word]: https://dictionary.cambridge.org/dictionary/english/[word]
+- [word]: https://dictionary.cambridge.org/dictionary/english/[word]
+Con nghe và sửa lại nhé."
+
+IMPORTANT:
+- Always include valid Cambridge Dictionary links for mispronounced words.
+- Use <br> for line breaks in "detailedFeedback".
+- Tone: Encouraging, caring, friendly (like a kind teacher).
 
 Please provide your analysis in the following JSON format:
 {
   "score": [number from 0-100],
-  "overall": "[brief overall assessment]",
+  "overall": "[brief overall assessment in Vietnamese]",
   "pronunciationErrors": [
-    {"word": "[mispronounced word]", "error": "[what's wrong]", "correction": "[how to say it correctly]"},
-    {"word": "[word 2]", "error": "[error type]", "correction": "[correct pronunciation]"}
+    {"word": "[mispronounced word]", "error": "[vietnamese explanation]", "correction": "[correct phonetics]"}
   ],
   "strengths": [
-    "[strength 1]",
-    "[strength 2]",
-    "[strength 3]"
+    "[strength 1 in Vietnamese]",
+    "[strength 2 in Vietnamese]",
+    "[strength 3 in Vietnamese]"
   ],
   "improvements": [
-    "[area 1 to improve - PRIORITIZE pronunciation issues]",
-    "[area 2 to improve]",
-    "[area 3 to improve]"
+    "[improvement 1 in Vietnamese]",
+    "[improvement 2 in Vietnamese]",
+    "[improvement 3 in Vietnamese]"
   ],
-  "detailedFeedback": "[detailed paragraph focusing on: 1) Specific pronunciation mistakes (list words), 2) Vietnamese accent features to improve, 3) Grammar and vocabulary, 4) Fluency and delivery]"
+  "detailedFeedback": "[THE TEACHER FEEDBACK MESSAGE AS DESCRIBED ABOVE]"
 }
 
 Analyze these aspects IN THIS ORDER:
-1. **PRONUNCIATION** (most important) - List specific mispronounced words
+1. **PRONUNCIATION** (most important)
 2. Common Vietnamese English errors  
-3. Fluency and pace
-4. Grammar and vocabulary
-5. Content organization
-6. Confidence and delivery`;
+3. Fluency and pace`;
 
         // Prepare content parts
         const parts = [

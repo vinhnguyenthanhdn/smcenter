@@ -393,7 +393,19 @@ function displayResults() {
     });
 
     // Display detailed feedback
-    elements.detailedFeedback.textContent = result.detailedFeedback;
+    // Convert plain text URLs to clickable links if Gemini didn't format them as HTML tags
+    let feedbackContent = result.detailedFeedback || "";
+    // Ensure line breaks
+    if (!feedbackContent.includes('<br>')) {
+        feedbackContent = feedbackContent.replace(/\n/g, '<br>');
+    }
+    // Linkify URLs
+    feedbackContent = feedbackContent.replace(
+        /(https?:\/\/[^\s<]+)/g,
+        '<a href="$1" target="_blank" style="color:var(--primary-color);text-decoration:underline;">$1</a>'
+    );
+
+    elements.detailedFeedback.innerHTML = feedbackContent;
 }
 
 // Animate Score
