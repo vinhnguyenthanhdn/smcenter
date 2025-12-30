@@ -22,7 +22,12 @@ export default async function handler(request, response) {
     // 1. Get API Keys (Legacy single key OR New multi-key support)
     const keys = process.env.GEMINI_API_KEYS
         ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(k => k)
-        : (process.env.GEMINI_API_KEY ? [process.env.GEMINI_API_KEY] : []);
+        : (process.env.GEMINI_API_KEY ? [process.env.GEMINI_API_KEY.trim()] : []);
+
+    // Debug: Log key details (masked) to identify whitespace/format issues
+    keys.forEach((k, i) => {
+        console.log(`Debug Key #${i + 1}: Length=${k.length}, Start=${k.substring(0, 4)}***, End=***${k.substring(k.length - 4)}`);
+    });
 
     if (keys.length === 0) {
         console.error("Missing GEMINI_API_KEYS or GEMINI_API_KEY");
