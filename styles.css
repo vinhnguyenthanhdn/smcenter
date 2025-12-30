@@ -1,30 +1,30 @@
 :root {
-    /* Color Palette */
-    --primary-color: hsl(260, 100%, 65%);
-    --primary-dark: hsl(260, 100%, 55%);
-    --primary-light: hsl(260, 100%, 75%);
-    --accent-color: hsl(340, 100%, 65%);
+    /* Color Palette - Green-White Theme */
+    --primary-color: hsl(145, 63%, 49%);
+    --primary-dark: hsl(145, 63%, 39%);
+    --primary-light: hsl(145, 63%, 69%);
+    --accent-color: hsl(168, 76%, 42%);
     --success-color: hsl(142, 71%, 45%);
     --warning-color: hsl(45, 100%, 51%);
     --danger-color: hsl(4, 90%, 58%);
 
-    /* Neutral Colors */
-    --bg-primary: hsl(240, 15%, 8%);
-    --bg-secondary: hsl(240, 12%, 12%);
-    --bg-tertiary: hsl(240, 10%, 16%);
-    --surface: hsl(240, 8%, 20%);
-    --surface-hover: hsl(240, 8%, 25%);
+    /* Neutral Colors - White Base */
+    --bg-primary: hsl(0, 0%, 98%);
+    --bg-secondary: hsl(0, 0%, 100%);
+    --bg-tertiary: hsl(145, 20%, 97%);
+    --surface: hsl(145, 15%, 95%);
+    --surface-hover: hsl(145, 25%, 92%);
 
     /* Text Colors */
-    --text-primary: hsl(0, 0%, 98%);
-    --text-secondary: hsl(0, 0%, 75%);
-    --text-tertiary: hsl(0, 0%, 55%);
+    --text-primary: hsl(0, 0%, 15%);
+    --text-secondary: hsl(0, 0%, 35%);
+    --text-tertiary: hsl(0, 0%, 50%);
 
     /* Effects */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 24px rgba(124, 58, 237, 0.3);
+    --shadow-sm: 0 2px 8px rgba(16, 185, 129, 0.1);
+    --shadow-md: 0 4px 16px rgba(16, 185, 129, 0.15);
+    --shadow-lg: 0 8px 32px rgba(16, 185, 129, 0.2);
+    --shadow-glow: 0 0 24px rgba(16, 185, 129, 0.3);
 
     /* Spacing */
     --spacing-xs: 0.5rem;
@@ -53,7 +53,7 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, var(--bg-primary) 0%, hsl(260, 20%, 12%) 100%);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, hsl(145, 30%, 96%) 100%);
     color: var(--text-primary);
     min-height: 100vh;
     line-height: 1.6;
@@ -85,7 +85,7 @@ body {
     width: 48px;
     height: 48px;
     color: var(--primary-color);
-    filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4));
+    filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.4));
 }
 
 .logo-text {
@@ -150,7 +150,7 @@ body {
 }
 
 .upload-dropzone {
-    border: 2px dashed rgba(124, 58, 237, 0.4);
+    border: 2px dashed rgba(16, 185, 129, 0.4);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
     text-align: center;
@@ -320,7 +320,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    border: 4px solid rgba(124, 58, 237, 0.1);
+    border: 4px solid rgba(16, 185, 129, 0.1);
     border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -368,7 +368,7 @@ body {
     background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
     border-radius: 999px;
     transition: width var(--transition-slow);
-    box-shadow: 0 0 12px rgba(124, 58, 237, 0.6);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
 }
 
 .progress-text {
