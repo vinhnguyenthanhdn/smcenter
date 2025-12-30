@@ -1,9 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-export default async function handler(request, response) {
+module.exports = async (request, response) => {
     // Handle CORS
     response.setHeader('Access-Control-Allow-Credentials', true);
     response.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,6 +15,12 @@ export default async function handler(request, response) {
         return;
     }
 
+    // Check if API Key is configured
+    if (!process.env.GEMINI_API_KEY) {
+        console.error("Missing GEMINI_API_KEY");
+        return response.status(500).json({ error: "Server API Key not configured" });
+    }
+
     if (request.method !== 'POST') {
         return response.status(405).json({ error: 'Method not allowed' });
     }
@@ -25,15 +28,12 @@ export default async function handler(request, response) {
     try {
         const { videoData, mimeType } = request.body;
 
-        if (!process.env.GEMINI_API_KEY) {
-            return response.status(500).json({ error: "Server API Key not configured" });
-        }
-
         if (!videoData) {
             return response.status(400).json({ error: "No audio data provided" });
         }
 
-        // Initialize model
+        // Initialize Gemini API inside handler
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech audio with PRIORITY on pronunciation analysis.
@@ -104,12 +104,12 @@ Analyze these aspects IN THIS ORDER:
             analysisResult = JSON.parse(jsonText);
         } catch (e) {
             console.error("JSON Parse Error:", e);
-            // Fallback if AI returns unstructured text
+            // Fallback
             analysisResult = {
                 score: 75,
-                overall: "Analysis completed but format was unexpected.",
-                strengths: ["Audio received successfully"],
-                improvements: ["Check detailed feedback"],
+                overall: "Formatted analysis unavailable, see details.",
+                strengths: ["Audio processed"],
+                improvements: ["Check details"],
                 detailedFeedback: output
             };
         }
@@ -119,8 +119,8 @@ Analyze these aspects IN THIS ORDER:
     } catch (error) {
         console.error("Gemini API Error:", error);
         return response.status(500).json({
-            error: error.message || "Internal Server Error",
-            details: error.toString()
+            error: "AI Analysis Failed",
+            details: error.message
         });
     }
-}
+};
