@@ -1,0 +1,30 @@
+# Environment files
+.env
+.env.local
+.env*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local server file (not needed for Vercel)
+server.py
+
+# Git
+.git/
+.gitignore
+
+# Documentation (optional - remove if you want to include)
+FIX_LOG.md
+SETUP_GUIDE.md
