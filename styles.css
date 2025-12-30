@@ -447,10 +447,10 @@ body {
 }
 
 .overall-score {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--spacing-xl);
+    display: flex;
+    justify-content: center;
     align-items: center;
+    gap: var(--spacing-xl);
     padding: var(--spacing-xl);
     background: var(--bg-tertiary);
     border-radius: var(--radius-lg);

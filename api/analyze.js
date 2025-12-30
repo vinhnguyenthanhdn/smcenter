@@ -45,11 +45,16 @@ export default async function handler(request, response) {
 Analyze the audio with PRIORITY on pronunciation.
 
 Generate "detailedFeedback" strictly in this Vietnamese format:
-"Good job Con! [Khen ngợi 1-2 câu về sự tiến bộ, hoàn thành bài tập, hoặc âm cuối rõ ràng].
-Tuy nhiên, con sửa lại phát âm các từ sau để bài nói được hoàn thiện hơn nhé:
+"[Câu khen ngợi đa dạng và tự nhiên]. Tuy nhiên, con sửa lại phát âm các từ sau để bài nói được hoàn thiện hơn nhé:
 - [word]: https://dictionary.cambridge.org/dictionary/english/[word]
 - [word]: https://dictionary.cambridge.org/dictionary/english/[word]
 Con nghe và sửa lại nhé."
+
+INSTRUCTIONS FOR PRAISE (Important):
+- Be creative and generous with praise but keep it realistic.
+- Vary your vocabulary. Do NOT strictly stick to "Good job" every time.
+- Examples: "Cô rất ấn tượng với ngữ điệu tự tin của con hôm nay!", "Hoan hô con, bài tập về nhà con làm rất đầy đủ và chỉn chu.", "Giọng con hôm nay rất khỏe và rõ ràng, cô khen nhé!", "Con đã tiến bộ nhiều về âm đuôi (ending sounds), rất tốt!"...
+- Adapt the praise to the specific strengths of the speech (fluency, energy, precision, effort).
 
 IMPORTANT:
 - Always include valid Cambridge Dictionary links for mispronounced words.
