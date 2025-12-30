@@ -137,17 +137,23 @@ Analyze these aspects IN THIS ORDER:
         contents: [{ role: "user", parts }],
         generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 2048
+            maxOutputTokens: 8192
         }
     });
 
     const output = result.response.text();
+    console.log("Gemini response length:", output.length);
+
     // Parse JSON safely
     try {
-        const jsonText = output.replace(/```json\n/g, '').replace(/```\n/g, '').replace(/```/g, '').trim();
+        // Find JSON object using regex to ignore potential preamble/postscript text
+        const jsonMatch = output.match(/\{[\s\S]*\}/);
+        const jsonText = jsonMatch ? jsonMatch[0] : output.replace(/```json\n/g, '').replace(/```\n/g, '').replace(/```/g, '').trim();
+
         return JSON.parse(jsonText);
     } catch (e) {
         console.error("JSON Parse Error in Worker:", e);
+        console.error("Raw Output:", output);
         // Return structured fallback instead of crashing
         return {
             score: 75,
