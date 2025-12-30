@@ -250,7 +250,7 @@ async function analyzeWithGemini() {
         const videoBase64 = await blobToBase64(state.audioBlob);
 
         // Call our server endpoint instead of Gemini directly
-        const response = await fetch('/api', {
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
