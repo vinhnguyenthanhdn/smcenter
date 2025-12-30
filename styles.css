@@ -802,14 +802,20 @@ body {
 }
 
 .footer {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
     margin-top: var(--spacing-xl);
     padding-bottom: var(--spacing-lg);
 }
 
 .footer-text {
+    text-align: center;
     color: var(--text-tertiary);
     font-size: 0.9rem;
+    width: 100%;
+    margin: 0;
 }
 
 .highlight-text {
