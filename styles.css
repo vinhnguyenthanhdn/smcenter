@@ -801,9 +801,20 @@ body {
     gap: var(--spacing-md);
 }
 
+.footer {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+}
+
 .footer-text {
     color: var(--text-tertiary);
     font-size: 0.9rem;
+}
+
+.highlight-text {
+    color: var(--primary-color);
+    font-weight: 700;
 }
 
 /* Utility Classes */
