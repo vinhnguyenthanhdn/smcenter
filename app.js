@@ -125,11 +125,6 @@ function validateAndLoadVideo(file) {
 
 // Start Analysis
 async function startAnalysis() {
-    if (!state.apiKey) {
-        showApiKeyModal();
-        return;
-    }
-
     if (!state.currentVideo) {
         alert('Please upload a video first');
         return;
