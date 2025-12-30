@@ -32,10 +32,13 @@ export default async function handler(request, response) {
             return response.status(400).json({ error: "No audio data provided" });
         }
 
+        console.log("Initializing Gemini 1.5 Pro...");
+
         // Initialize Gemini API
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        // Use gemini-1.5-flash as it is multimodal
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        // Switch to gemini-1.5-pro (more widely available/stable than flash sometimes)
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
         const prompt = `You are an expert English speech coach specializing in helping Vietnamese English learners. Analyze this English speech audio with PRIORITY on pronunciation analysis.
 
@@ -94,7 +97,6 @@ Analyze these aspects IN THIS ORDER:
             generationConfig: {
                 temperature: 0.7,
                 maxOutputTokens: 2048
-                // REMOVED: responseMimeType: "application/json" to fix 400 bad request
             }
         });
 
