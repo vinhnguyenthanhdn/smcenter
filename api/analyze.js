@@ -102,6 +102,7 @@ IMPORTANT:
 - Always include valid Cambridge Dictionary links for mispronounced words.
 - Use <br> for line breaks in "detailedFeedback".
 - Tone: Encouraging, caring, friendly (like a kind teacher).
+- NEGATIVE CONSTRAINT: Do NOT mention "Vietnamese accent", "giọng Việt", or "âm hưởng tiếng Việt" in the feedback. Focus only on specific technical corrections.
 
 Please provide your analysis in the following JSON format:
 {
@@ -158,6 +159,7 @@ INSTRUCTIONS FOR TONE:
 - DO NOT repeat sentence ending particles (nhé, nha, ạ) more than ONCE.
 - Mix statement sentences with gentle encouragement.
 - Tone: Kind, supportive, and professional.
+- NEGATIVE CONSTRAINT: Do NOT mention "Vietnamese accent", "giọng Việt", or "âm hưởng tiếng Việt" in the feedback. Focus only on specific technical corrections.
 
 ---
 OUTPUT FORMAT (JSON):
