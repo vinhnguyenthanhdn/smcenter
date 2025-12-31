@@ -34,7 +34,7 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: "Server API Key not configured" });
     }
 
-    const { videoData, mimeType } = request.body;
+    const { videoData, mimeType, level } = request.body;
 
     if (!videoData) {
         return response.status(400).json({ error: "No audio data provided" });
@@ -47,7 +47,7 @@ export default async function handler(request, response) {
     for (const [index, apiKey] of keys.entries()) {
         try {
             console.log(`Attempting analysis with Key #${index + 1} (${apiKey.substring(0, 5)}...)`);
-            const result = await analyzeWithKey(apiKey, videoData, mimeType);
+            const result = await analyzeWithKey(apiKey, videoData, mimeType, level);
             console.log(`Success with Key #${index + 1}`);
             return response.status(200).json(result);
 
@@ -73,11 +73,11 @@ export default async function handler(request, response) {
 }
 
 // Helper function to encapsulate Gemini logic
-async function analyzeWithKey(apiKey, videoData, mimeType) {
+async function analyzeWithKey(apiKey, videoData, mimeType, level) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-    const prompt = `You are a friendly English teacher at "SM English Center" giving feedback to a Vietnamese student (address the student as "Con").
+    const PROMPT_LOW = `You are a friendly English teacher at "SM English Center" giving feedback to a Vietnamese student (address the student as "Con").
 
 Analyze the audio with PRIORITY on pronunciation.
 
@@ -127,6 +127,62 @@ Analyze these aspects IN THIS ORDER:
 1. **PRONUNCIATION** (most important)
 2. Common Vietnamese English errors  
 3. Fluency and pace`;
+
+    const PROMPT_HIGH = `You are a friendly English teacher at "SM English Center" giving feedback to a Vietnamese student (address the student as "Con").
+
+Analyze the audio/text with the following priority and criteria:
+
+1. **PRONUNCIATION & FLUENCY (Priority):**
+   - **Accent Leniency:** Be encouraging and ignore minor Vietnamese accent characteristics (e.g., slight vowel variations) as long as the speech is clear and intelligible.
+   - **Ending Sounds:** Only penalize missing ending sounds if they change the word's meaning or make it very hard to understand.
+   - **Connected Speech (New):** Check for word linking (nối từ). Encourage the student to link final consonants to following vowels (e.g., "look at" -> /lʊkæt/).
+   - **Stress & Intonation:** Check for correct word stress and natural sentence melody.
+
+2. **ACCURACY & GRAMMAR:**
+   - Check for missing words or consonants in clusters.
+   - **Singular/Plural:** Specifically check for missing "s/es" where required.
+   - **Meaning:** Ensure the sentence structure conveys the intended meaning correctly.
+
+---
+GENERATE "detailedFeedback" strictly in this Vietnamese format:
+"[Câu khen ngợi đa dạng và tự nhiên]. Tuy nhiên, con chú ý luyện tập thêm các từ và điểm sau đây:
+- [word/point]: [Cambridge link if word, or brief instruction if grammar/stress/linking]
+- [word/point]: [Cambridge link if word, or brief instruction if grammar/stress/linking]
+Con hãy nghe kỹ link từ điển và sửa lại cho đúng nhé."
+
+INSTRUCTIONS FOR PRAISE:
+- Be creative and focus on specific improvements (e.g., "Con nối từ rất tự nhiên", "Ngữ điệu của con rất có cảm xúc").
+- Avoid generic praise.
+
+INSTRUCTIONS FOR TONE:
+- DO NOT repeat sentence ending particles (nhé, nha, ạ) more than ONCE.
+- Mix statement sentences with gentle encouragement.
+- Tone: Kind, supportive, and professional.
+
+---
+OUTPUT FORMAT (JSON):
+{
+  "score": [number from 0-100],
+  "overall": "[brief overall assessment in Vietnamese, mentioning flow, accent, and naturalness]",
+  "pronunciationErrors": [
+    {"word": "[word/phrase]", "error": "[e.g., chưa nối từ, thiếu 's', sai trọng âm]", "correction": "[correct phonetics, linking guide, or grammar rule]"}
+  ],
+  "strengths": [
+    "[strength 1: e.g., phát âm rõ ràng, dễ hiểu]",
+    "[strength 2: e.g., có ý thức nối từ]",
+    "[strength 3: e.g., ngữ điệu tự nhiên]"
+  ],
+  "improvements": [
+    "[improvement 1: e.g., tập nối từ ở các cụm từ phổ biến]",
+    "[improvement 2: e.g., chú ý âm đuôi s/es]",
+    "[improvement 3: e.g., nhấn trọng âm rõ hơn ở các từ dài]"
+  ],
+  "detailedFeedback": "[THE FEEDBACK MESSAGE AS DESCRIBED ABOVE. Use <br> for line breaks]"
+}
+`;
+
+    // Select Prompt based on level
+    const prompt = (level === 'high') ? PROMPT_HIGH : PROMPT_LOW;
 
     const parts = [
         { text: prompt },

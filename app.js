@@ -270,6 +270,9 @@ async function analyzeWithGemini() {
         // Convert COMPRESSED AUDIO to base64
         const videoBase64 = await blobToBase64(state.audioBlob);
 
+        // Get selected level
+        const level = document.querySelector('input[name="level"]:checked').value;
+
         // Call our server endpoint instead of Gemini directly
         const response = await fetch('/api/analyze', {
             method: 'POST',
@@ -278,7 +281,8 @@ async function analyzeWithGemini() {
             },
             body: JSON.stringify({
                 videoData: videoBase64.split(',')[1], // Remove data:audio/... prefix
-                mimeType: state.mimeType || 'audio/mp3'
+                mimeType: state.mimeType || 'audio/mp3',
+                level: level
             })
         });
 

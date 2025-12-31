@@ -972,3 +972,44 @@ body {
 svg defs {
     display: none;
 }
+
+/* Level Selection */
+.level-selection {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.level-option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.level-option:hover {
+    background: var(--surface);
+    transform: translateY(-2px);
+}
+
+.level-option input[type="radio"]:checked+.level-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.level-option:has(input[type="radio"]:checked) {
+    border-color: var(--primary-color);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.level-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
